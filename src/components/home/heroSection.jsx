@@ -1,5 +1,5 @@
 import React from 'react'
-import tallerImage from '../assets/taller-mecanico.jpeg'
+import tallerImage from '../../assets/taller-mecanico.jpeg'
 
 const HeroSection = () => {
   return (
