@@ -8,10 +8,10 @@ function App() {
   return (
     <Routes>
       {/* públicas */}
-      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
 
       {/* privadas */}
+      <Route path="/" element={ <PrivateRoute> <Home/> </PrivateRoute> }/>
       <Route path="/users/new" element={ <PrivateRoute> <CreateUser/> </PrivateRoute> }/>
     </Routes>
   );

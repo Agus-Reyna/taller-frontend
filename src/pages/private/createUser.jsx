@@ -71,10 +71,12 @@ export default function CreateUser() {
       const response = await api.post("/auth/register", {
         email,
         password,
-        full_name: `${name} ${surname}`.trim()
+        full_name: `${name} ${surname}`.trim(),
+        role
       })
 
       console.log("SIGNUP OK", response.data)
+      alert("✅ Usuario creado con éxito")
       navigate("/")
       
     } catch (error) {
