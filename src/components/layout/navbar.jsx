@@ -1,18 +1,20 @@
 import logo from "../../assets/logo.png"
 import { LogOut, User, UserPlus, Menu, X } from "lucide-react";
 import { useAuth } from "../../context/authContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 
 const navItems = [
-  { label: "Acceso Rápido", href: "#acceso-rapido" },
-  { label: "Métricas", href: "#metricas" },
-  { label: "Actividad Reciente", href: "#actividad-reciente" }
+  { label: "Inicio", href: "/" },
+  { label: "Clientes", href: "/clientes" },
+  { label: "Vehículos", href: "/vehiculos" },
+  { label: "Servicios", href: "/servicios" }
 ];
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -39,18 +41,25 @@ const Navbar = () => {
               AutoTaller
             </span>
           </div>
-
-          {/* Desktop */}
+          
           <ul className="hidden lg:flex items-center space-x-2 flex-1 justify-center">
             {navItems.map((item, index) => (
               <li key={index}>
-                <a 
-                  href={item.href}
-                  className="relative text-gray-700 hover:text-blue-600 font-light transition-all duration-300 group px-4 py-2.5 rounded-lg hover:scale-105 inline-block whitespace-nowrap tracking-wider text-base"
+                <Link 
+                  to={item.href}
+                  className={`relative font-light transition-all duration-300 group px-4 py-2.5 rounded-lg hover:scale-105 inline-block whitespace-nowrap tracking-wider text-base ${
+                    location.pathname === item.href 
+                      ? 'text-blue-600 font-medium' 
+                      : 'text-gray-700 hover:text-blue-600'
+                  }`}
                 >
                   {item.label}
-                  <span className="absolute left-4 bottom-1 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-[calc(100%-2rem)]"></span>
-                </a>
+                  <span className={`absolute left-4 bottom-1 h-0.5 bg-blue-600 transition-all duration-300 ${
+                    location.pathname === item.href 
+                      ? 'w-[calc(100%-2rem)]' 
+                      : 'w-0 group-hover:w-[calc(100%-2rem)]'
+                  }`}></span>
+                </Link>
               </li>
             ))}
           </ul>
@@ -82,7 +91,6 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* Mobile */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -107,13 +115,17 @@ const Navbar = () => {
             <ul className="space-y-2">
               {navItems.map((item, index) => (
                 <li key={index}>
-                  <a 
-                    href={item.href}
+                  <Link 
+                    to={item.href}
                     onClick={handleNavClick}
-                    className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors font-light"
+                    className={`block px-4 py-3 rounded-lg transition-colors font-light ${
+                      location.pathname === item.href
+                        ? 'bg-blue-50 text-blue-600 font-medium'
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                    }`}
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
