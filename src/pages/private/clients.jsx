@@ -95,7 +95,7 @@ export default function Clients() {
 
   return (
     <div className="flex flex-col min-h-screen" style={{ fontFamily: '"Poppins", sans-serif' }}>
-      <Navbar />
+      <Navbar/>
       <div className="flex-1 container mx-auto px-4 py-8">
         <ClientHeader 
           onSearch={handleSearch}
@@ -108,15 +108,13 @@ export default function Clients() {
           loading={loading}
         />
       </div>
-      
       <EditClientModal 
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         client={clientToEdit}
         onUpdate={handleClientUpdated}
       />
-      
-      <Footer />
+      <Footer/>
     </div>
   )
 }
