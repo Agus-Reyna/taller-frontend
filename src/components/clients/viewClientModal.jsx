@@ -11,13 +11,16 @@ const ViewClientModal = ({ isOpen, onClose, client, onEdit }) => {
 
   const formatDate = (dateString) => {
     if (!dateString) return 'No disponible'
-    return new Date(dateString).toLocaleDateString('es-AR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    const date = new Date(dateString)
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const year = date.getFullYear()
+    const time = date.toLocaleTimeString('es-AR', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: true
     })
+    return `${day}/${month}/${year}, ${time}`
   }
   
   return (
