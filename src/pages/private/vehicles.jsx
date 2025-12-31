@@ -9,12 +9,15 @@ import api from '../../api/axios'
 export default function Vehicles(){
   const [vehicles, setVehicles] = useState([])
   const [filteredVehicles, setFilteredVehicles] = useState([])
+  const [clients, setClients] = useState([])
+  const [clientsLoading, setClientsLoading] = useState(true)
   const [loading, setLoading] = useState(true)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [vehicleToEdit, setVehicleToEdit] = useState(null)
   
   useEffect(() => {
     fetchVehicles()
+    fetchClients()
   }, [])
 
 
@@ -29,6 +32,19 @@ export default function Vehicles(){
       alert('No se pudieron cargar los vehiculos')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchClients = async () => {
+    try {
+      setClientsLoading(true)
+      const res = await api.get('/clients')
+      setClients(res.data || [])
+    } catch (err) {
+      console.error('Error al cargar clientes:', err)
+      setClients([])
+    } finally {
+      setClientsLoading(false)
     }
   }
 
@@ -101,6 +117,8 @@ export default function Vehicles(){
         <VehicleHeader
           onSearch={handleSearch}
           onVehicleCreated={handleVehicleCreated}
+          clients={clients}
+          clientsLoading={clientsLoading}
         />
         <VehicleTable 
           vehicles={filteredVehicles}

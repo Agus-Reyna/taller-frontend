@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { X } from 'lucide-react'
 
-const NewVehicleModal= ({ isOpen, onClose, onSubmit }) => {
+const NewVehicleModal= ({ isOpen, onClose, onSubmit, clients = [], clientsLoading = false }) => {
   const [formData, setFormData] = useState({
     client_id: '',
     brand: '',
@@ -28,6 +28,10 @@ const NewVehicleModal= ({ isOpen, onClose, onSubmit }) => {
 
   const validate = () => {
     const newErrors = {}
+    
+    if (!formData.client_id) {
+      newErrors.client_id = 'Debe seleccionar un cliente'
+    }
 
     if (!formData.brand.trim()) {
       newErrors.brand = 'La marca es requerida'
@@ -37,8 +41,26 @@ const NewVehicleModal= ({ isOpen, onClose, onSubmit }) => {
 
     if (!formData.model.trim()) {
       newErrors.model = 'El modelo es requerido'
-    } else if (formData.model.trim().length < 3) {
-      newErrors.model = 'El modelo debe tener al menos 3 caracteres'
+    } else if (formData.model.trim().length < 1) {
+      newErrors.model = 'El modelo es obligatorio'
+    }
+
+    const currentYear = new Date().getFullYear()
+    const year = parseInt(formData.year)
+    if (!formData.year) {
+      newErrors.year = 'El año es requerido'
+    } else if (isNaN(year) || year < 1900 || year > currentYear + 1) {
+      newErrors.year = `El año debe estar entre 1900 y ${currentYear + 1}`
+    }
+
+    if (!formData.plate || formData.plate.trim().length === 0) {
+      newErrors.plate = 'La patente es requerida'
+    } else {
+      const plateNoSpaces = formData.plate.replace(/\s/g, '')
+      const plateRegex = /^[A-Z]{2,3}\d{3}[A-Z]{0,3}$/i
+      if (!plateRegex.test(plateNoSpaces) || plateNoSpaces.length < 6 || plateNoSpaces.length > 9) {
+        newErrors.plate = 'Formato inválido (Ej: ABC123 o AB123CD)'
+      }
     }
 
     setErrors(newErrors)
@@ -54,7 +76,7 @@ const NewVehicleModal= ({ isOpen, onClose, onSubmit }) => {
     try {
       await onSubmit(formData)
 
-      setFormData({ client_id: '', brand: '', model: '', year: '', plate: ''})
+      setFormData({ client_id: '', brand: '', model: '', year: '', plate: '' })
       setErrors({})
       onClose()
     } catch (error) {
@@ -65,14 +87,14 @@ const NewVehicleModal= ({ isOpen, onClose, onSubmit }) => {
   }
 
   const handleClose = () => {
-    setFormData({ client_id: '', brand: '', model: '', year: '', plate: ''})
+    setFormData({ client_id: '', brand: '', model: '', year: '', plate: '' })
     setErrors({})
     onClose()
   }
 
   return (
     <div 
-      className='fixed inset-0 backdrop-blur-sm flex justify-center items-center z-50 p-4'
+      className='fixed inset-0 backdrop-blur-sm flex justify-center items-center z-60 p-4'
       onClick={handleClose}
     >
       <div 
@@ -93,86 +115,128 @@ const NewVehicleModal= ({ isOpen, onClose, onSubmit }) => {
         <form onSubmit={handleSubmit} className='p-6'>
           <div className='space-y-4'>
             <div>
-              <label htmlFor='name' className='block text-sm font-medium text-gray-700 mb-1'>
+              <label htmlFor='client_id' className='block text-sm font-medium text-gray-700 mb-1'>
+                Cliente <span className='text-red-500'>*</span>
+              </label>
+              <select
+                id='client_id'
+                name='client_id'
+                value={formData.client_id}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                  errors.client_id ? 'border-red-500' : 'border-gray-300'
+                }`}
+                disabled={loading || clientsLoading}
+              >
+                {clientsLoading ? (
+                  <option value='' disabled>
+                    Cargando clientes...
+                  </option>
+                ) : clients.length === 0 ? (
+                  <option value='' disabled>
+                    No hay clientes
+                  </option>
+                ) : (
+                  <option value='' disabled hidden>
+                    Seleccionar cliente
+                  </option>
+                )}
+
+                {clients.map(client => (
+                  <option key={client.id} value={client.id}>
+                    {client.name} - {client.cellphone}
+                  </option>
+                ))}
+              </select>
+              {errors.client_id && (
+                <p className='text-red-500 text-sm mt-1'>{errors.client_id}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor='brand' className='block text-sm font-medium text-gray-700 mb-1'>
                 Marca del Vehículo <span className='text-red-500'>*</span>
               </label>
               <input
                 type='text'
-                id='name'
-                name='name'
-                value={formData.name}
+                id='brand'
+                name='brand'
+                value={formData.brand}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
+                  errors.brand ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder='Ej: Toyota'
                 disabled={loading}
               />
-              {errors.name && (
-                <p className='text-red-500 text-sm mt-1'>{errors.name}</p>
+              {errors.brand && (
+                <p className='text-red-500 text-sm mt-1'>{errors.brand}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor='name' className='block text-sm font-medium text-gray-700 mb-1'>
+              <label htmlFor='model' className='block text-sm font-medium text-gray-700 mb-1'>
                 Modelo del Vehículo <span className='text-red-500'>*</span>
               </label>
               <input
                 type='text'
-                id='name'
-                name='name'
-                value={formData.name}
+                id='model'
+                name='model'
+                value={formData.model}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
+                  errors.model ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder='Ej: Corolla'
                 disabled={loading}
               />
-              {errors.name && (
-                <p className='text-red-500 text-sm mt-1'>{errors.name}</p>
+              {errors.model && (
+                <p className='text-red-500 text-sm mt-1'>{errors.model}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor='name' className='block text-sm font-medium text-gray-700 mb-1'>
+              <label htmlFor='year' className='block text-sm font-medium text-gray-700 mb-1'>
                 Año del Vehículo <span className='text-red-500'>*</span>
               </label>
               <input
-                type='year'
-                id='name'
-                name='name'
-                value={formData.name}
+                type='number'
+                id='year'
+                name='year'
+                value={formData.year}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
+                  errors.year ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder='Ej: 2015'
+                min='1900'
+                max={new Date().getFullYear() + 1}
                 disabled={loading}
               />
-              {errors.name && (
-                <p className='text-red-500 text-sm mt-1'>{errors.name}</p>
+              {errors.year && (
+                <p className='text-red-500 text-sm mt-1'>{errors.year}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor='name' className='block text-sm font-medium text-gray-700 mb-1'>
+              <label htmlFor='plate' className='block text-sm font-medium text-gray-700 mb-1'>
                 Patente del Vehículo <span className='text-red-500'>*</span>
               </label>
               <input
                 type='text'
-                id='name'
-                name='name'
-                value={formData.name}
+                id='plate'
+                name='plate'
+                value={formData.plate}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
+                  errors.plate ? 'border-red-500' : 'border-gray-300'
                 }`}
-                placeholder='Ej: AF 123 CD'
+                placeholder='Ej: ABC123 o AB123CD'
+                maxLength='10'
                 disabled={loading}
               />
-              {errors.name && (
-                <p className='text-red-500 text-sm mt-1'>{errors.name}</p>
+              {errors.plate && (
+                <p className='text-red-500 text-sm mt-1'>{errors.plate}</p>
               )}
             </div>
           </div>
@@ -189,9 +253,9 @@ const NewVehicleModal= ({ isOpen, onClose, onSubmit }) => {
             <button
               type='submit'
               className='flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-blue-400 disabled:cursor-not-allowed'
-              disabled={loading}
+              disabled={loading || clientsLoading || clients.length === 0}
             >
-              {loading ? 'Creando...' : 'Crear Vehículo'}
+              {loading ? 'Creando...' : clientsLoading ? 'Cargando clientes...' : clients.length === 0 ? 'No hay clientes' : 'Crear Vehículo'}
             </button>
           </div>
         </form>

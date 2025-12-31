@@ -3,7 +3,7 @@ import { Search, Car } from 'lucide-react'
 import NewVehicleModal from './newVehicleModal'
 import api from '../../api/axios'
 
-const VehicleHeader = ({ onSearch, onVehicleCreated }) => {
+const VehicleHeader = ({ onSearch, onVehicleCreated, clients = [], clientsLoading = false }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -65,11 +65,21 @@ const VehicleHeader = ({ onSearch, onVehicleCreated }) => {
           </div>
           
           <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg whitespace-nowrap"
+            onClick={() => !clientsLoading && setIsModalOpen(true)}
+            disabled={clientsLoading}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg whitespace-nowrap ${clientsLoading ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
           >
-            <Car className="w-5 h-5" />
-            <span className="font-medium">Nuevo Vehiculo</span>
+            {clientsLoading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" style={{ borderColor: 'rgba(255,255,255,0.6)', borderTopColor: 'transparent' }} />
+                <span className="font-medium">Cargando clientes...</span>
+              </>
+            ) : (
+              <>
+                <Car className="w-5 h-5" />
+                <span className="font-medium">Nuevo Vehiculo</span>
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -78,6 +88,8 @@ const VehicleHeader = ({ onSearch, onVehicleCreated }) => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleCreateVehicle}
+        clients={clients}
+        clientsLoading={clientsLoading}
       />
     </>
   )
